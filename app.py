@@ -622,7 +622,7 @@ with tab5:
 
     inadim_grp["total"]    = inadim_grp[True] + inadim_grp[False]
     inadim_grp["taxa_pct"] = (inadim_grp[True] / inadim_grp["total"] * 100).round(2).fillna(0)
-    inadim_grp.rename(columns={True: "inadimplente_val", False: "adimplente_val"}, inplace=True)
+    inadim_grp = inadim_grp.rename(columns={True: "inadimplente_val", False: "adimplente_val"})
     inadim_grp = inadim_grp[inadim_grp["uf"] != "Não Informado"].sort_values("taxa_pct", ascending=False)
 
     col_c, col_d = st.columns(2)
