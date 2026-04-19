@@ -1,0 +1,13 @@
+# Credenciais — NUNCA enviar para o GitHub
+.env
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+env/
+
+# VS Code
+.vscode/
