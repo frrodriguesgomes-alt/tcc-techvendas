@@ -265,7 +265,7 @@ with tab1:
         separators=SEPARATORS,
         bargap=0.3,
     )
-    st.plotly_chart(fig_anual, use_container_width=True)
+    st.plotly_chart(fig_anual, width="stretch")
 
     # ── Gráfico 2 + 3: Top Estados e MoM% lado a lado ──
     col_a, col_b = st.columns(2)
@@ -297,7 +297,7 @@ with tab1:
             coloraxis_showscale=False,
             margin=dict(l=5),
         )
-        st.plotly_chart(fig_uf_rec, use_container_width=True)
+        st.plotly_chart(fig_uf_rec, width="stretch")
 
     with col_b:
         # Crescimento Mês a Mês (%) — identifica tendências e sazonalidade
@@ -323,7 +323,7 @@ with tab1:
         fig_mom.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
         fig_mom.add_hline(y=0, line_dash="dot", line_color="gray")
         fig_mom.update_layout(separators=SEPARATORS, showlegend=False, xaxis_tickangle=-45)
-        st.plotly_chart(fig_mom, use_container_width=True)
+        st.plotly_chart(fig_mom, width="stretch")
 
     # ── Gráfico 4: Receita Trimestral PF vs PJ ──
     rec_tipo = (
@@ -341,7 +341,7 @@ with tab1:
         color_discrete_map={"Pessoa Física": "#6C63FF", "Pessoa Jurídica": "#FF6584"},
     )
     fig_pf_pj.update_layout(separators=SEPARATORS, yaxis_tickprefix="R$ ", xaxis_tickangle=-45)
-    st.plotly_chart(fig_pf_pj, use_container_width=True)
+    st.plotly_chart(fig_pf_pj, width="stretch")
 
     with st.expander("Ver receita mensal detalhada"):
         tbl_mensal = (
@@ -352,7 +352,7 @@ with tab1:
         )
         tbl_mensal["valor_venda"] = tbl_mensal["valor_venda"].apply(brl)
         tbl_mensal.columns = ["Mês/Ano", "Total Vendido"]
-        st.dataframe(tbl_mensal, use_container_width=True, hide_index=True)
+        st.dataframe(tbl_mensal, width="stretch", hide_index=True)
 
 # ══════════════════════════════════════════════
 # TAB 2 — Vendedores: Top 5 + Abaixo da Média
@@ -399,7 +399,7 @@ with tab2:
     fig_top5.update_traces(texttemplate="R$ %{text:,.0f}", textposition="outside")
     fig_top5.update_layout(separators=SEPARATORS, yaxis_tickprefix="R$ ",
                            coloraxis_showscale=False, showlegend=False)
-    st.plotly_chart(fig_top5, use_container_width=True)
+    st.plotly_chart(fig_top5, width="stretch")
 
     st.markdown("#### Tabela de Comissões (2,5%)")
     top5_fmt = top5[["vendedor", "total_vendido", "comissao", "num_vendas"]].copy()
@@ -407,7 +407,7 @@ with tab2:
     top5_fmt["comissao"]      = top5_fmt["comissao"].apply(brl)
     top5_fmt["num_vendas"]    = top5_fmt["num_vendas"].apply(inteiro)
     top5_fmt.columns = ["Vendedor", "Total Vendido", "Comissão (2,5%)", "Nº de Vendas"]
-    st.dataframe(top5_fmt, use_container_width=True, hide_index=True)
+    st.dataframe(top5_fmt, width="stretch", hide_index=True)
 
     st.divider()
 
@@ -444,7 +444,7 @@ with tab2:
         coloraxis_showscale=False,
         height=max(450, len(abaixo) * 26),
     )
-    st.plotly_chart(fig_abaixo, use_container_width=True)
+    st.plotly_chart(fig_abaixo, width="stretch")
 
     with st.expander(f"Ver tabela — {inteiro(len(abaixo))} vendedores abaixo da média"):
         tbl_abaixo = abaixo[["vendedor", "total_vendido", "gap", "pct_da_media", "num_vendas"]].copy()
@@ -453,7 +453,7 @@ with tab2:
         tbl_abaixo["pct_da_media"]  = tbl_abaixo["pct_da_media"].apply(pct)
         tbl_abaixo["num_vendas"]    = tbl_abaixo["num_vendas"].apply(inteiro)
         tbl_abaixo.columns = ["Vendedor", "Total Vendido", "Distância da Média", "% da Média", "Nº de Vendas"]
-        st.dataframe(tbl_abaixo, use_container_width=True, hide_index=True)
+        st.dataframe(tbl_abaixo, width="stretch", hide_index=True)
 
 # ══════════════════════════════════════════════
 # TAB 3 — Melhores Clientes
@@ -497,7 +497,7 @@ with tab3:
         height=max(420, top_n * 34),
         legend=dict(orientation="h", yanchor="bottom", y=1.02),
     )
-    st.plotly_chart(fig_cli, use_container_width=True)
+    st.plotly_chart(fig_cli, width="stretch")
 
     col_x, col_y = st.columns(2)
     with col_x:
@@ -510,7 +510,7 @@ with tab3:
             color_discrete_map={"Pessoa Física": "#6C63FF", "Pessoa Jurídica": "#FF6584"},
         )
         fig_tipo.update_layout(separators=SEPARATORS)
-        st.plotly_chart(fig_tipo, use_container_width=True)
+        st.plotly_chart(fig_tipo, width="stretch")
 
     with col_y:
         fig_hist = px.histogram(
@@ -520,7 +520,7 @@ with tab3:
             color_discrete_sequence=["#6C63FF"],
         )
         fig_hist.update_layout(separators=SEPARATORS, xaxis_tickprefix="R$ ")
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist, width="stretch")
 
     with st.expander(f"Ver tabela completa (Top {top_n})"):
         tbl_cli = top_cli[["cliente", "tipo_cliente", "total_comprado", "ticket_medio", "num_compras"]].copy()
@@ -528,7 +528,7 @@ with tab3:
         tbl_cli["ticket_medio"]   = tbl_cli["ticket_medio"].apply(brl)
         tbl_cli["num_compras"]    = tbl_cli["num_compras"].apply(inteiro)
         tbl_cli.columns = ["Cliente", "Tipo", "Total Comprado", "Ticket Médio", "Nº de Compras"]
-        st.dataframe(tbl_cli, use_container_width=True, hide_index=True)
+        st.dataframe(tbl_cli, width="stretch", hide_index=True)
 
 # ══════════════════════════════════════════════
 # TAB 4 — Produtos
@@ -563,7 +563,7 @@ with tab4:
         fig_vol.update_traces(texttemplate="R$ %{text:,.0f}", textposition="outside")
         fig_vol.update_layout(separators=SEPARATORS, yaxis_tickprefix="R$ ",
                               coloraxis_showscale=False)
-        st.plotly_chart(fig_vol, use_container_width=True)
+        st.plotly_chart(fig_vol, width="stretch")
 
     with col_b:
         fig_marg = px.bar(
@@ -575,14 +575,14 @@ with tab4:
         )
         fig_marg.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
         fig_marg.update_layout(separators=SEPARATORS, coloraxis_showscale=False)
-        st.plotly_chart(fig_marg, use_container_width=True)
+        st.plotly_chart(fig_marg, width="stretch")
 
     with st.expander("Ver tabela completa (clique no cabeçalho para ordenar)"):
         tbl_cat = cat_resumo[["categoria", "volume_total", "margem_total", "margem_pct", "qtd_itens"]].copy()
         tbl_cat.columns = ["Categoria", "Volume Vendido (R$)", "Margem Total (R$)", "Margem (%)", "Qtd. Itens"]
         st.dataframe(
             tbl_cat,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Categoria":           st.column_config.TextColumn("Categoria"),
@@ -638,7 +638,7 @@ with tab5:
         )
         fig_uf.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
         fig_uf.update_layout(separators=SEPARATORS, coloraxis_showscale=False)
-        st.plotly_chart(fig_uf, use_container_width=True)
+        st.plotly_chart(fig_uf, width="stretch")
 
     with col_d:
         fig_pizza_uf = px.pie(
@@ -649,7 +649,7 @@ with tab5:
             hole=0.45,
         )
         fig_pizza_uf.update_layout(separators=SEPARATORS)
-        st.plotly_chart(fig_pizza_uf, use_container_width=True)
+        st.plotly_chart(fig_pizza_uf, width="stretch")
 
     # Tabela com valores NUMÉRICOS — sortável corretamente pelo Streamlit
     st.markdown("#### Tabela Completa por Estado (clique no cabeçalho para ordenar)")
@@ -658,7 +658,7 @@ with tab5:
 
     st.dataframe(
         tbl_uf_num,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             "UF":                       st.column_config.TextColumn("Estado"),
@@ -699,7 +699,7 @@ with tab6:
         fig_ticket.update_traces(texttemplate="R$ %{text:,.0f}", textposition="outside")
         fig_ticket.update_layout(separators=SEPARATORS, yaxis_tickprefix="R$ ",
                                  coloraxis_showscale=False)
-        st.plotly_chart(fig_ticket, use_container_width=True)
+        st.plotly_chart(fig_ticket, width="stretch")
 
     with col_f:
         fig_vol_pag = px.pie(
@@ -709,7 +709,7 @@ with tab6:
             hole=0.45,
         )
         fig_vol_pag.update_layout(separators=SEPARATORS)
-        st.plotly_chart(fig_vol_pag, use_container_width=True)
+        st.plotly_chart(fig_vol_pag, width="stretch")
 
     with st.expander("Ver tabela"):
         tbl_pag = pag_resumo.copy()
@@ -717,7 +717,7 @@ with tab6:
         tbl_pag["total_vendido"] = tbl_pag["total_vendido"].apply(brl)
         tbl_pag["num_vendas"]    = tbl_pag["num_vendas"].apply(inteiro)
         tbl_pag.columns = ["Forma de Pagamento", "Ticket Médio", "Total Vendido", "Nº de Vendas"]
-        st.dataframe(tbl_pag, use_container_width=True, hide_index=True)
+        st.dataframe(tbl_pag, width="stretch", hide_index=True)
 
 # ══════════════════════════════════════════════
 # TAB 7 — IA Groq
