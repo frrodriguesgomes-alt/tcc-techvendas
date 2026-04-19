@@ -64,11 +64,11 @@ df_vendas, df_itens, df_inadim = load_all_data()
 
 # --- Vendas ---
 df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"], utc=True).dt.tz_convert(None)
-df_vendas.rename(columns={"valor": "valor_venda"}, inplace=True)
-df_vendas["vendedor"].fillna("Sem Vendedor", inplace=True)
-df_vendas["cliente"].fillna("Cliente Não Identificado", inplace=True)
-df_vendas["uf"].fillna("Não Informado", inplace=True)
-df_vendas["forma_pagamento"].fillna("Não Informado", inplace=True)
+df_vendas = df_vendas.rename(columns={"valor": "valor_venda"})
+df_vendas["vendedor"] = df_vendas["vendedor"].fillna("Sem Vendedor")
+df_vendas["cliente"] = df_vendas["cliente"].fillna("Cliente Não Identificado")
+df_vendas["uf"] = df_vendas["uf"].fillna("Não Informado")
+df_vendas["forma_pagamento"] = df_vendas["forma_pagamento"].fillna("Não Informado")
 
 df_vendas["data_venda_date"] = df_vendas["data_venda"].dt.date
 df_vendas["ano"]             = df_vendas["data_venda"].dt.year
@@ -79,16 +79,16 @@ df_vendas["comissao"]        = df_vendas["valor_venda"] * 0.025
 
 # --- Itens ---
 df_itens["data_venda"] = pd.to_datetime(df_itens["data_venda"], utc=True).dt.tz_convert(None)
-df_itens["categoria"].fillna("Sem Categoria", inplace=True)
-df_itens["custo"].fillna(0, inplace=True)
-df_itens["margem_unitaria"].fillna(0, inplace=True)
-df_itens["margem_total"].fillna(0, inplace=True)
+df_itens["categoria"] = df_itens["categoria"].fillna("Sem Categoria")
+df_itens["custo"] = df_itens["custo"].fillna(0)
+df_itens["margem_unitaria"] = df_itens["margem_unitaria"].fillna(0)
+df_itens["margem_total"] = df_itens["margem_total"].fillna(0)
 df_itens["data_venda_date"] = df_itens["data_venda"].dt.date
 
 # --- Inadimplência ---
 df_inadim["data_venda"]  = pd.to_datetime(df_inadim["data_venda"],  utc=True).dt.tz_convert(None)
 df_inadim["vencimento"]  = pd.to_datetime(df_inadim["vencimento"],  utc=False)  # campo date do PG
-df_inadim["uf"].fillna("Não Informado", inplace=True)
+df_inadim["uf"] = df_inadim["uf"].fillna("Não Informado")
 df_inadim["data_venda_date"] = df_inadim["data_venda"].dt.date
 
 # Data de referência: hoje (recalculada a cada carregamento do painel).
