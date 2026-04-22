@@ -125,8 +125,10 @@ def carregar_itens() -> pd.DataFrame:
 # ─────────────────────────────────────────────
 def carregar_inadimplencia() -> pd.DataFrame:
     """
-    Retorna DataFrame com todas as parcelas, incluindo data de vencimento,
-    para permitir cálculo dinâmico de inadimplência baseado na data atual.
+    Retorna DataFrame agregado por mês/UF/situação para análise de inadimplência.
+    Agrega no banco (em vez de retornar 1M+ linhas brutas) para caber na memória
+    do Streamlit Cloud.
+    A flag 'vencido' (vencimento < CURRENT_DATE) é calculada diretamente no SQL.
     """
     query = """
     WITH pessoa_estado AS (
@@ -140,27 +142,19 @@ def carregar_inadimplencia() -> pd.DataFrame:
         ORDER BY end_cli.id_pessoa, end_cli.id
     )
     SELECT
-        nf.numero_nf,
-        nf.data_venda,
-        nf.valor                                                    AS valor_venda,
-        COALESCE(pf.nome, pj.razao_social)                          AS cliente,
-        CASE WHEN pf.id IS NOT NULL THEN 'Pessoa Física'
-             ELSE 'Pessoa Jurídica' END                             AS tipo_pessoa,
-        parc.valor                                                  AS valor_parcela,
-        fp.descricao                                                AS forma_pagamento,
-        parc.numero                                                 AS numero_parcela,
-        st.descricao                                                AS situacao,
-        cr.vencimento,
-        pe.uf
+        DATE_TRUNC('month', nf.data_venda)::date   AS data_venda,
+        COALESCE(pe.uf, 'Não Informado')           AS uf,
+        st.descricao                                AS situacao,
+        (cr.vencimento < CURRENT_DATE)             AS vencido,
+        SUM(parc.valor)                             AS valor_parcela,
+        COUNT(*)                                    AS qtd_parcelas
     FROM vendas.nota_fiscal       nf
     JOIN vendas.parcela           parc ON parc.id_nota_fiscal = nf.id
     JOIN financeiro.conta_receber cr   ON cr.id_parcela       = parc.id
     JOIN financeiro.situacao_titulo st ON cr.id_situacao      = st.id
-    LEFT JOIN vendas.forma_pagamento fp ON nf.id_forma_pagto  = fp.id
-    LEFT JOIN geral.pessoa_fisica   pf ON nf.id_cliente       = pf.id
-    LEFT JOIN geral.pessoa_juridica pj ON nf.id_cliente       = pj.id
-    LEFT JOIN pessoa_estado         pe ON nf.id_cliente       = pe.id_pessoa
-    ORDER BY nf.data_venda
+    LEFT JOIN pessoa_estado        pe  ON nf.id_cliente       = pe.id_pessoa
+    GROUP BY 1, 2, 3, 4
+    ORDER BY 1
     """
     engine = get_engine()
     with engine.connect() as conn:

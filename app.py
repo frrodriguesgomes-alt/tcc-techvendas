@@ -85,23 +85,21 @@ df_itens["margem_unitaria"] = df_itens["margem_unitaria"].fillna(0)
 df_itens["margem_total"] = df_itens["margem_total"].fillna(0)
 df_itens["data_venda_date"] = df_itens["data_venda"].dt.date
 
-# --- Inadimplência ---
-df_inadim["data_venda"]  = pd.to_datetime(df_inadim["data_venda"],  utc=True).dt.tz_convert(None)
-df_inadim["vencimento"]  = pd.to_datetime(df_inadim["vencimento"],  utc=False)  # campo date do PG
+# --- Inadimplência (dados pré-agregados por mês/UF/situação no SQL) ---
+# data_venda = primeiro dia do mês (DATE_TRUNC no SQL), sem timezone
+df_inadim["data_venda"] = pd.to_datetime(df_inadim["data_venda"])
 df_inadim["uf"] = df_inadim["uf"].fillna("Não Informado")
 df_inadim["data_venda_date"] = df_inadim["data_venda"].dt.date
 
-# Data de referência: hoje (recalculada a cada carregamento do painel).
-# Inadimplente = parcela cujo prazo já venceu E ainda não foi paga:
-#   • situacao == "ATRASADA"  → sistema marcou como atrasada
-#   • situacao == "EM_ABERTO" + vencimento < hoje → venceu mas status não foi atualizado
+# 'vencido' já vem calculado no SQL como (vencimento < CURRENT_DATE)
+# Inadimplente = ATRASADA  OU  (EM_ABERTO + já vencido)
 HOJE = pd.Timestamp(datetime.date.today())
 
 df_inadim["inadimplente"] = (
     (df_inadim["situacao"] == "ATRASADA")
     | (
         (df_inadim["situacao"] == "EM_ABERTO")
-        & (df_inadim["vencimento"] < HOJE)
+        & (df_inadim["vencido"] == True)
     )
 )
 # "CANCELADA" não é dívida válida: não entra no denominador da taxa
@@ -606,7 +604,7 @@ with tab5:
     st.caption(f"📅 Data de referência: **{HOJE.strftime('%d/%m/%Y')}** — recalculada a cada abertura do painel.")
     st.info(
         f"ℹ️ Parcelas canceladas são excluídas do cálculo (não representam dívida válida). "
-        f"No período selecionado: **{inteiro(df_n[df_n['cancelada']].shape[0])}** parcelas canceladas excluídas."
+        f"No período selecionado: **{inteiro(df_n[df_n['cancelada']]['qtd_parcelas'].sum())}** parcelas canceladas excluídas."
     )
 
     # Agrupa por UF usando apenas parcelas válidas (sem CANCELADA)
