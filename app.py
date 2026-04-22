@@ -575,21 +575,14 @@ with tab4:
         fig_marg.update_layout(separators=SEPARATORS, coloraxis_showscale=False)
         st.plotly_chart(fig_marg, width="stretch")
 
-    with st.expander("Ver tabela completa (clique no cabeçalho para ordenar)"):
+    with st.expander("Ver tabela completa por categoria"):
         tbl_cat = cat_resumo[["categoria", "volume_total", "margem_total", "margem_pct", "qtd_itens"]].copy()
-        tbl_cat.columns = ["Categoria", "Volume Vendido (R$)", "Margem Total (R$)", "Margem (%)", "Qtd. Itens"]
-        st.dataframe(
-            tbl_cat,
-            width="stretch",
-            hide_index=True,
-            column_config={
-                "Categoria":           st.column_config.TextColumn("Categoria"),
-                "Volume Vendido (R$)": st.column_config.NumberColumn("Volume Vendido (R$)", format="R$ %,.0f"),
-                "Margem Total (R$)":   st.column_config.NumberColumn("Margem Total (R$)",   format="R$ %,.0f"),
-                "Margem (%)":          st.column_config.NumberColumn("Margem (%)",           format="%.1f %%"),
-                "Qtd. Itens":          st.column_config.NumberColumn("Qtd. Itens",           format="%d"),
-            },
-        )
+        tbl_cat["volume_total"] = tbl_cat["volume_total"].apply(brl)
+        tbl_cat["margem_total"] = tbl_cat["margem_total"].apply(brl)
+        tbl_cat["margem_pct"]   = tbl_cat["margem_pct"].apply(pct)
+        tbl_cat["qtd_itens"]    = tbl_cat["qtd_itens"].apply(inteiro)
+        tbl_cat.columns = ["Categoria", "Volume Vendido", "Margem Total", "Margem (%)", "Qtd. Itens"]
+        st.dataframe(tbl_cat, width="stretch", hide_index=True)
 
 # ══════════════════════════════════════════════
 # TAB 5 — Risco Financeiro (cálculo corrigido + tabela com sort numérico)
@@ -649,23 +642,14 @@ with tab5:
         fig_pizza_uf.update_layout(separators=SEPARATORS)
         st.plotly_chart(fig_pizza_uf, width="stretch")
 
-    # Tabela com valores NUMÉRICOS — sortável corretamente pelo Streamlit
-    st.markdown("#### Tabela Completa por Estado (clique no cabeçalho para ordenar)")
+    st.markdown("#### Tabela Completa por Estado")
     tbl_uf_num = inadim_grp[["uf", "inadimplente_val", "adimplente_val", "total", "taxa_pct"]].copy()
-    tbl_uf_num.columns = ["UF", "Inadimplente (R$)", "Em Dia / A Vencer (R$)", "Total (R$)", "Taxa (%)"]
-
-    st.dataframe(
-        tbl_uf_num,
-        width="stretch",
-        hide_index=True,
-        column_config={
-            "UF":                       st.column_config.TextColumn("Estado"),
-            "Inadimplente (R$)":        st.column_config.NumberColumn("Inadimplente (R$)",        format="R$ %,.0f"),
-            "Em Dia / A Vencer (R$)":   st.column_config.NumberColumn("Em Dia / A Vencer (R$)",   format="R$ %,.0f"),
-            "Total (R$)":               st.column_config.NumberColumn("Total (R$)",               format="R$ %,.0f"),
-            "Taxa (%)":                 st.column_config.NumberColumn("Taxa Inadimp. (%)",         format="%.2f %%"),
-        },
-    )
+    tbl_uf_num["inadimplente_val"] = tbl_uf_num["inadimplente_val"].apply(brl)
+    tbl_uf_num["adimplente_val"]   = tbl_uf_num["adimplente_val"].apply(brl)
+    tbl_uf_num["total"]            = tbl_uf_num["total"].apply(brl)
+    tbl_uf_num["taxa_pct"]         = tbl_uf_num["taxa_pct"].apply(lambda x: pct(x, 2))
+    tbl_uf_num.columns = ["UF", "Inadimplente", "Em Dia / A Vencer", "Total", "Taxa (%)"]
+    st.dataframe(tbl_uf_num, width="stretch", hide_index=True)
 
 # ══════════════════════════════════════════════
 # TAB 6 — Formas de Pagamento
