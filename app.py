@@ -642,14 +642,21 @@ with tab5:
         fig_pizza_uf.update_layout(separators=SEPARATORS)
         st.plotly_chart(fig_pizza_uf, width="stretch")
 
-    st.markdown("#### Tabela Completa por Estado")
+    st.markdown("#### Tabela Completa por Estado (clique no cabeçalho para ordenar)")
     tbl_uf_num = inadim_grp[["uf", "inadimplente_val", "adimplente_val", "total", "taxa_pct"]].copy()
-    tbl_uf_num["inadimplente_val"] = tbl_uf_num["inadimplente_val"].apply(brl)
-    tbl_uf_num["adimplente_val"]   = tbl_uf_num["adimplente_val"].apply(brl)
-    tbl_uf_num["total"]            = tbl_uf_num["total"].apply(brl)
-    tbl_uf_num["taxa_pct"]         = tbl_uf_num["taxa_pct"].apply(lambda x: pct(x, 2))
-    tbl_uf_num.columns = ["UF", "Inadimplente", "Em Dia / A Vencer", "Total", "Taxa (%)"]
-    st.dataframe(tbl_uf_num, width="stretch", hide_index=True)
+    tbl_uf_num.columns = ["UF", "Inadimplente (R$)", "Em Dia / A Vencer (R$)", "Total (R$)", "Taxa (%)"]
+    st.dataframe(
+        tbl_uf_num,
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "UF":                     st.column_config.TextColumn("Estado"),
+            "Inadimplente (R$)":      st.column_config.NumberColumn("Inadimplente (R$)",    format="R$ %,.2f"),
+            "Em Dia / A Vencer (R$)": st.column_config.NumberColumn("Em Dia / A Vencer (R$)", format="R$ %,.2f"),
+            "Total (R$)":             st.column_config.NumberColumn("Total (R$)",            format="R$ %,.2f"),
+            "Taxa (%)":               st.column_config.NumberColumn("Taxa Inadimp. (%)",     format="%.2f%%"),
+        },
+    )
 
 # ══════════════════════════════════════════════
 # TAB 6 — Formas de Pagamento
