@@ -19,12 +19,26 @@ def _secret(key: str, default: str = "") -> str:
         return os.getenv(key, default)
 
 def get_engine():
+    """
+    Cria engine SQLAlchemy com NullPool:
+    - Sem pool de conexões persistentes → nunca esgota o limite do banco
+    - Cada query abre e fecha a conexão imediatamente
+    - Seguro para ambientes com limite restrito de conexões (alwaysdata free tier)
+    """
+    from sqlalchemy.pool import NullPool
     host     = _secret("DB_HOST",     "postgresql-datadt.alwaysdata.net")
     dbname   = _secret("DB_NAME",     "datadt_digital_corporativo")
     user     = _secret("DB_USER",     "datadt_data_analytics")
     password = _secret("DB_PASSWORD", "DataAnalytics$100")
     url = f"postgresql+psycopg2://{user}:{password}@{host}/{dbname}"
-    return create_engine(url)
+    return create_engine(
+        url,
+        poolclass=NullPool,          # sem pool — fecha conexão ao sair do "with"
+        connect_args={
+            "connect_timeout": 30,   # aborta se não conectar em 30s
+            "options": "-c statement_timeout=120000",  # cancela queries > 2 min
+        },
+    )
 
 
 # ─────────────────────────────────────────────
@@ -145,7 +159,7 @@ def carregar_inadimplencia() -> pd.DataFrame:
         DATE_TRUNC('month', nf.data_venda)::date   AS data_venda,
         COALESCE(pe.uf, 'Não Informado')           AS uf,
         st.descricao                                AS situacao,
-        (cr.vencimento < CURRENT_DATE)             AS vencido,
+        COALESCE(cr.vencimento < CURRENT_DATE, FALSE) AS vencido,
         SUM(parc.valor)                             AS valor_parcela,
         COUNT(*)                                    AS qtd_parcelas
     FROM vendas.nota_fiscal       nf
